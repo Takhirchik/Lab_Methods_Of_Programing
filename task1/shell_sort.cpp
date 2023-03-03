@@ -1,20 +1,27 @@
 #include <iostream>
+#include <string>
 
-template < class RandomIt >
-void my_swap(RandomIt& first, RandomIt& second) //T - тип, указанный в параметре шаблона
-{
-    RandomIt temp(first); //временная переменная должна быть того же типа, что и параметры
-    first = second;
-    second = temp;
-}
+template< class RandomIt>
+class Compare {
+public:
+    static bool less(RandomIt a, RandomIt b) {
+        return a > b;
+    }
+};
 
-template< class RandomIt >
+class CompareStr {
+public:
+    static bool less(char* a, char* b) {
+        return strcmp(a, b) >= 0;
+    }
+};
+
+template< class RandomIt, class Compare>
 void shell_sort(RandomIt* arr, size_t size)
 {
     for (auto d = size / 2; d > 0; d /= 2)
-        //нужен цикл для first = a[0..d-1]
         for (auto i = d; i < size; ++i)
-            for (auto j = i - d; j >= 0 && (arr[j] > arr[j + d]); j -= d) {
+            for (auto j = i - d; j >= 0 && Compare::less(arr[j], arr[j + d]); j -= d) {
                 RandomIt temp = arr[j];
                 arr[j] = arr[j + d];
                 arr[j + d] = temp;
@@ -23,7 +30,7 @@ void shell_sort(RandomIt* arr, size_t size)
 }
 
 template< class RandomIt >
-void print_array(const RandomIt * arr, size_t size) {
+void print_array(const RandomIt* arr, size_t size) {
     for (size_t i = 0; i < size; ++i)
         std::cout << arr[i] << ' ';
     std::cout << std::endl;
@@ -31,8 +38,14 @@ void print_array(const RandomIt * arr, size_t size) {
 
 
 int main() {
-    const size_t n = 6;
-    int arr[n] = { 1, 3, 6, -2, 99, -40 };
-    shell_sort(arr, n);
-    print_array(arr, n);
+    const size_t n1 = 6;
+    int arr1[n1] = { 1, 3, 6, -2, 99, -40 };
+    const size_t n2 = 5;
+    double arr2[n2] = { 1.9, 7.8, 1.9, 29.8, -1.7 };
+    shell_sort<int, Compare<int>>(arr1, n1);
+    shell_sort<double, Compare<double>>(arr2, n2);
+    print_array(arr1, n1);
+    std::cout << std::endl;
+    print_array(arr2, n2);
+    std::cout << std::endl;
 }
