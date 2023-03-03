@@ -9,13 +9,6 @@ public:
     }
 };
 
-class CompareStr {
-public:
-    static bool less(char* a, char* b) {
-        return strcmp(a, b) >= 0;
-    }
-};
-
 template< class RandomIt, class Compare>
 void shell_sort(RandomIt* arr, size_t size)
 {
