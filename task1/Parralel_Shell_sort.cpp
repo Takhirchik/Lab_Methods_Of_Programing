@@ -82,8 +82,9 @@ void printTimeOfWork(int sizeOfArray, void functionOfSort(int*, int, int, int)) 
 }
 
 int main() {
-
-    printTimeOfWork1(10000000, shell_sort);
-    printTimeOfWork(10000000, parralel_shell_sort);
+    //~22s
+    printTimeOfWork1(100000000, shell_sort);
+    //~12s
+    printTimeOfWork(100000000, parralel_shell_sort);
     cout << endl;
 }
