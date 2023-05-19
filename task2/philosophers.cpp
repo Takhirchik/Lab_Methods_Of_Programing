@@ -4,6 +4,9 @@
 #include <ctime>
 #include <pthread.h>
 #include <sys/wait.h>
+#include <unistd.h>
+// #define Sleep(X) sleep(X)
+// #define wait() scanf("1")
 
 using namespace std;
 
@@ -24,11 +27,14 @@ typedef struct table{
     pthread_mutex_t forks[PHT_SIZE ];
 }table_t;
 
-// Делаем единый объект 
+// Делаем единый объект
 typedef struct philosopher_args_tag {
     const phil_t *philosopher;
     table_t *table;
 } philosopher_args_t;
+
+
+pthread_mutex_t entry_point = PTHREAD_MUTEX_INITIALIZER;
 
 // инициализируем объекты
 void init_philosopher(phil_t *philosopher, const char *name, unsigned left_fork, unsigned right_fork) {
@@ -37,32 +43,38 @@ void init_philosopher(phil_t *philosopher, const char *name, unsigned left_fork,
     philosopher->right_fork = right_fork;
 }
 
-// заполняем массив вилок нулями
+// заполняем массив вилок
 void init_table(table_t *table){
     for (size_t i = 0; i < PHT_SIZE ; ++i){
         pthread_mutex_init(&table->forks[i], NULL);
     }
 }
 
+int k = 0;
 
 void * eat(void * args) {
     philosopher_args_t *arg = (philosopher_args_t *) args;
     const phil_t *philosopher = arg->philosopher;
-    table_t *table = arg->table;
-  
-    printf("%s started dinner\n", philosopher->name);
- 
-    pthread_mutex_lock(&table->forks[philosopher->left_fork]);
-    pthread_mutex_lock(&table->forks[philosopher->right_fork]);
- 
-    printf("%s is eating\n", philosopher->name);
- 
-    pthread_mutex_unlock(&table->forks[philosopher->right_fork]);
-    pthread_mutex_unlock(&table->forks[philosopher->left_fork]);
- 
-    printf("%s finished dinner\n", philosopher->name);
-}
+    table_t *table = arg->table; 
+    do {
+        printf("%s started dinner\n", philosopher->name);
+    
+        pthread_mutex_lock(&entry_point);
+        pthread_mutex_lock(&table->forks[philosopher->left_fork]);
 
+        sleep(5);
+        
+        pthread_mutex_lock(&table->forks[philosopher->right_fork]);
+        pthread_mutex_unlock(&entry_point);
+        printf("%s is eating\n", philosopher->name);
+
+        pthread_mutex_unlock(&table->forks[philosopher->right_fork]);
+        pthread_mutex_unlock(&table->forks[philosopher->left_fork]);
+
+        printf("%s finished dinner\n", philosopher->name);
+        k++; 
+    } while (k < 100);
+}
 
 int main() {
     pthread_t threads[PHT_SIZE];
