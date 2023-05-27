@@ -72,7 +72,7 @@ public:
 int main() {
 	setlocale(LC_ALL, "russian");
 	table table;
-	array<philosopher, Philosophers_count> philosophers
+	array<philosopher, Philosophers_count> p
 	{
 	   {
 		  { "Aristotel", table.forks[0], table.forks[1] },
