@@ -41,26 +41,32 @@ public:
 		} while (k < 100);
 	}
 	
+	void printStatus(string message) {
+		out.lock();
+		cout << name << message << '\n';
+		out.unlock();
+	}
+
 	void eat() {
 		if (left_fork.mutex.try_lock()) {
 			//left_fork.mutex.lock();
 			if (right_fork.mutex.try_lock()) {
 				//right_fork.mutex.lock();
-				cout << name << " is eating" << '\n';
+				printStatus(" is eating");
 				this_thread::sleep_for(chrono::seconds(rand()%5 + 1));
 				left_fork.mutex.unlock();
 				right_fork.mutex.unlock();
-				cout << name << " finished eating" << '\n';
+				printStatus(" finished eating");
 			}
 			else {
 				left_fork.mutex.unlock();
-				cout << name << " is waiting" << '\n';
+				printStatus(" is waiting");
 				this_thread::sleep_for(chrono::seconds(rand() % 5 + 1));
 				eat();
 			}
 		}
 		else {
-			cout << name << " is waiting" << '\n';
+			printStatus(" is waiting");
 			this_thread::sleep_for(chrono::seconds(rand() % 5 + 1));
 			eat();
 		}
