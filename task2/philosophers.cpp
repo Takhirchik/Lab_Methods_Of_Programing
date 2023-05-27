@@ -1,3 +1,4 @@
+
 #include <iostream>
 #include <thread>
 #include <vector>
@@ -24,7 +25,7 @@ typedef struct philosopher{
 
 // Стол 
 typedef struct table{
-    pthread_mutex_t forks[PHT_SIZE ];
+    pthread_mutex_t forks[PHT_SIZE];
 }table_t;
 
 // Делаем единый объект
@@ -32,7 +33,6 @@ typedef struct philosopher_args_tag {
     const phil_t *philosopher;
     table_t *table;
 } philosopher_args_t;
-
 
 pthread_mutex_t entry_point = PTHREAD_MUTEX_INITIALIZER;
 
@@ -50,31 +50,47 @@ void init_table(table_t *table){
     }
 }
 
-int k = 0;
+int k = 0, phil = 0;
+
+int f1 = 0, f2 = 2;
+
+void mod(){
+    f1 = f1 % 5;
+    f2 = f2 % 5;
+}
 
 void * eat(void * args) {
     philosopher_args_t *arg = (philosopher_args_t *) args;
     const phil_t *philosopher = arg->philosopher;
-    table_t *table = arg->table; 
-    do {
-        printf("%s started dinner\n", philosopher->name);
-    
-        pthread_mutex_lock(&entry_point);
-        pthread_mutex_lock(&table->forks[philosopher->left_fork]);
+    table_t *table = arg->table;
+    do{ 
+        if ((phil == f1) || (phil == f2)){
+            printf("%s started\n", philosopher->name);
 
-        sleep(5);
-        
-        pthread_mutex_lock(&table->forks[philosopher->right_fork]);
-        pthread_mutex_unlock(&entry_point);
-        printf("%s is eating\n", philosopher->name);
+            pthread_mutex_lock(&table->forks[philosopher->left_fork]);
+            pthread_mutex_lock(&table->forks[philosopher->right_fork]);
 
-        pthread_mutex_unlock(&table->forks[philosopher->right_fork]);
-        pthread_mutex_unlock(&table->forks[philosopher->left_fork]);
+            printf("%s is eating\n", philosopher->name);
+            
+            sleep(5);
 
-        printf("%s finished dinner\n", philosopher->name);
-        k++; 
-    } while (k < 100);
+            pthread_mutex_unlock(&table->forks[philosopher->right_fork]);
+            pthread_mutex_unlock(&table->forks[philosopher->left_fork]);
+            
+            printf("%s finished\n", philosopher->name);
+        }
+        else {
+            printf("%s wait\n", philosopher->name);
+            sleep(5);
+        }
+        k++;
+        ++f1;
+        ++f2;
+        mod();
+        phil++;
+    } while (k < 30);
 }
+
 
 int main() {
     pthread_t threads[PHT_SIZE];
@@ -90,20 +106,20 @@ int main() {
     init_philosopher(&philosophers[2], "Platon", 2, 3);
     init_philosopher(&philosophers[3], "Sokrat", 3, 4);
     init_philosopher(&philosophers[4], "Confucius", 4, 0);
- 
+    
     for (size_t i = 0; i < PHT_SIZE; i++) {
         args[i].philosopher = &philosophers[i];
         args[i].table = &table;
     }
- 
-    for (size_t i = 0; i < PHT_SIZE; i++) {
+
+    for (size_t i = 0; i < PHT_SIZE; i++)
         pthread_create(&threads[i], NULL, eat, &args[i]);
-    }
  
-    for (size_t i = 0; i < PHT_SIZE; i++) {
-        pthread_join(threads[i], NULL);
-    }
+    for (size_t i = 0; i < PHT_SIZE; i++)
+       pthread_join(threads[i], NULL);
 
     pid_t wait(int *status);
     return 0;
 }
+
+
