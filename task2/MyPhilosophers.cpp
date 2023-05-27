@@ -31,9 +31,7 @@ public:
 		thread.join();
 	}
 	void dinner() {
-		out.lock();
-		cout << name << " started dinner" << '\n';
-		out.unlock();
+		printStatus(" started dinner");
 		int k = 0;
 		do {
 			eat();
