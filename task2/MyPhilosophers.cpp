@@ -31,6 +31,9 @@ public:
 		thread.join();
 	}
 	void dinner() {
+		out.lock();
+		cout << name << " started dinner" << '\n';
+		out.unlock();
 		int k = 0;
 		do {
 			eat();
@@ -39,37 +42,26 @@ public:
 	}
 	
 	void eat() {
-		out.lock();
-		cout << name << " started dinner" << '\n';
-		out.unlock();
 		if (left_fork.mutex.try_lock()) {
 			//left_fork.mutex.lock();
 			if (right_fork.mutex.try_lock()) {
 				//right_fork.mutex.lock();
-				out.lock();
 				cout << name << " is eating" << '\n';
-				out.unlock();
-				this_thread::sleep_for(chrono::seconds(rand()%5));
+				this_thread::sleep_for(chrono::seconds(rand()%5 + 1));
 				left_fork.mutex.unlock();
 				right_fork.mutex.unlock();
-				out.lock();
 				cout << name << " finished eating" << '\n';
-				out.unlock();
 			}
 			else {
 				left_fork.mutex.unlock();
-				out.lock();
 				cout << name << " is waiting" << '\n';
-				out.unlock();
-				this_thread::sleep_for(chrono::seconds(rand() % 5));
+				this_thread::sleep_for(chrono::seconds(rand() % 5 + 1));
 				eat();
 			}
 		}
 		else {
-			out.lock();
 			cout << name << " is waiting" << '\n';
-			out.unlock();
-			this_thread::sleep_for(chrono::seconds(rand() % 5));
+			this_thread::sleep_for(chrono::seconds(rand() % 5 + 1));
 			eat();
 		}
 	}
